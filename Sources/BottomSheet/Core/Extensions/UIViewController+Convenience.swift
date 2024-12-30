@@ -15,15 +15,18 @@ public final class DefaultBottomSheetPresentationControllerFactory: BottomSheetP
 
     // MARK: - Public properties
 
+    private let allowTapToDismiss: Bool
     private let configuration: BottomSheetConfiguration
     private let dismissalHandlerProvider: DismissalHandlerProvider
 
     // MARK: - Init
 
     public init(
+        allowTapToDismiss: Bool,
         configuration: BottomSheetConfiguration,
         dismissalHandlerProvider: @escaping DismissalHandlerProvider
     ) {
+        self.allowTapToDismiss = allowTapToDismiss
         self.dismissalHandlerProvider = dismissalHandlerProvider
         self.configuration = configuration
     }
@@ -37,6 +40,7 @@ public final class DefaultBottomSheetPresentationControllerFactory: BottomSheetP
         BottomSheetPresentationController(
             presentedViewController: presentedViewController,
             presentingViewController: presentingViewController,
+            allowTapToDismiss: allowTapToDismiss,
             dismissalHandler: dismissalHandlerProvider(),
             configuration: configuration
         )
@@ -98,13 +102,14 @@ public extension UIViewController {
 
     func presentBottomSheet(
         viewController: UIViewController,
+        allowTapToDismiss: Bool,
         configuration: BottomSheetConfiguration,
         canBeDismissed: @escaping (() -> Bool) = { true },
         dismissCompletion: (() -> Void)? = nil
     ) {
         weak var presentingViewController = self
         weak var currentBottomSheetTransitionDelegate: UIViewControllerTransitioningDelegate?
-        let presentationControllerFactory = DefaultBottomSheetPresentationControllerFactory(configuration: configuration) {
+        let presentationControllerFactory = DefaultBottomSheetPresentationControllerFactory(allowTapToDismiss: allowTapToDismiss, configuration: configuration) {
             DefaultBottomSheetModalDismissalHandler(presentingViewController: presentingViewController, canBeDismissed: canBeDismissed) {
                 if currentBottomSheetTransitionDelegate === presentingViewController?.bottomSheetTransitionDelegate {
                     presentingViewController?.bottomSheetTransitionDelegate = nil
@@ -123,6 +128,7 @@ public extension UIViewController {
 
     func presentBottomSheetInsideNavigationController(
         viewController: UIViewController,
+        allowTapToDismiss: Bool,
         configuration: BottomSheetConfiguration,
         canBeDismissed: @escaping (() -> Bool) = { true },
         dismissCompletion: (() -> Void)? = nil
@@ -130,6 +136,7 @@ public extension UIViewController {
         let navigationController = BottomSheetNavigationController(rootViewController: viewController, configuration: configuration)
         presentBottomSheet(
             viewController: navigationController,
+            allowTapToDismiss: allowTapToDismiss,
             configuration: configuration,
             canBeDismissed: canBeDismissed,
             dismissCompletion: dismissCompletion
