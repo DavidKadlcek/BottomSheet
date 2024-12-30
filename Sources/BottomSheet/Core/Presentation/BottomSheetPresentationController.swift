@@ -65,6 +65,8 @@ public final class BottomSheetPresentationController: UIPresentationController {
 
     private var cachedInsets: UIEdgeInsets = .zero
 
+    private let allowTapToDismiss: Bool
+    
     private let dismissalHandler: BottomSheetModalDismissalHandler
     private let configuration: BottomSheetConfiguration
 
@@ -73,9 +75,11 @@ public final class BottomSheetPresentationController: UIPresentationController {
     public init(
         presentedViewController: UIViewController,
         presentingViewController: UIViewController?,
+        allowTapToDismiss: Bool = true,
         dismissalHandler: BottomSheetModalDismissalHandler,
         configuration: BottomSheetConfiguration
     ) {
+        self.allowTapToDismiss = allowTapToDismiss
         self.dismissalHandler = dismissalHandler
         self.configuration = configuration
         super.init(presentedViewController: presentedViewController, presenting: presentingViewController)
@@ -298,10 +302,12 @@ public final class BottomSheetPresentationController: UIPresentationController {
         containerView.addSubview(shadingView)
         shadingView.frame = containerView.bounds
 
-        let tapGesture = UITapGestureRecognizer()
-        shadingView.addGestureRecognizer(tapGesture)
+        if allowTapToDismiss {
+            let tapGesture = UITapGestureRecognizer()
+            shadingView.addGestureRecognizer(tapGesture)
 
-        tapGesture.addTarget(self, action: #selector(handleShadingViewTapGesture))
+            tapGesture.addTarget(self, action: #selector(handleShadingViewTapGesture))
+        }
 
         self.shadingView = shadingView
     }
